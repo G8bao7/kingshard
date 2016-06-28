@@ -17,6 +17,7 @@ package router
 import (
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/flike/kingshard/core/errors"
 	"github.com/flike/kingshard/core/golog"
@@ -330,11 +331,13 @@ func (plan *Plan) checkValuesType(vals sqlparser.Values) sqlparser.Values {
 func (plan *Plan) getValueType(valExpr sqlparser.ValExpr) int {
 	switch node := valExpr.(type) {
 	case *sqlparser.ColName:
+		qualifier := strings.Trim(string(node.Qualifier), "`")
+		nodeName := strings.Trim(string(node.Name), "`")
 		//remove table name
-		if string(node.Qualifier) == plan.Rule.Table {
+		if qualifier == plan.Rule.Table {
 			node.Qualifier = nil
 		}
-		if string(node.Name) == plan.Rule.Key {
+		if nodeName == plan.Rule.Key {
 			return EID_NODE //表示这是分片id对应的node
 		}
 	case sqlparser.ValTuple:
